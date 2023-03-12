@@ -29,8 +29,6 @@ const removeContact = async (contactId) => {
   const isContactFound = contacts.findIndex(
     (object) => object.id === contactId
   );
-  //console.log("index:", isContactFound);
-  console.log("contacts", contacts);
   const removedContacts = contacts.splice(isContactFound, 1);
   console.log("removedContacts", removedContacts);
   const dataToAdd = JSON.stringify(contacts);
@@ -39,7 +37,21 @@ const removeContact = async (contactId) => {
   return isContactFound;
 };
 
-const updateContact = async (contactId, body) => {};
+const updateContact = async (contactId, body) => {
+  const contactToUpdate = contacts.find((object) => object.id === contactId);
+  for (const key in body) {
+    contactToUpdate[key] = body[key];
+  }
+  await removeContact(contactId);
+  contacts.push(contactToUpdate);
+
+  console.table(contacts);
+  const dataToAdd = JSON.stringify(contacts);
+  const dataToAddString = `${dataToAdd}`;
+  await fs.writeFile(contactsPath, dataToAddString);
+
+  return contactToUpdate;
+};
 
 module.exports = {
   listContacts,
