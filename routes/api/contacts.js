@@ -27,25 +27,32 @@ router.get("/:contactId", async (req, res, next) => {
 });
 
 router.post("/", async (req, res, next) => {
-  req.body.name = "";
-  req.body.email = "";
-  req.body.phone = "152-125-152";
+  req.body.name = "test";
+  req.body.email = "ula@wp.pl";
+  req.body.phone = "412-125-145";
   const keys = Object.keys(req.body);
   console.log("keys", keys);
   console.log("req.body", req.body);
 
   if (!req.body.name || !req.body.email || !req.body.phone) {
+    const message = [];
     if (!req.body.name) {
-      res.status(400).json({ message: "missing required name - field" });
+      message.push({ message: "missing required name - field" });
+      //res.status(400).json({ message: "missing required name - field" });
     }
 
     if (!req.body.email) {
-      res.status(400).json({ message: "missing required email - field" });
+      message.push({ message: "missing required email - field" });
+      console.log(message);
+      // res.status(400).json({ message: "missing required email - field" });
     }
 
     if (!req.body.phone) {
-      res.status(400).json({ message: "missing required phone - field" });
+      message.push({ message: "missing required phone - field" });
+      console.log(message);
+      // res.status(400).json({ message: "missing required phone - field" });
     }
+    return res.status(400).json(message);
   }
 
   if (req.body.name && req.body.email && req.body.phone) {
