@@ -4,6 +4,7 @@ const {
   getContactById,
   addContact,
   removeContact,
+  updateContact,
 } = require("../../models/contacts.js");
 const { logger } = require("../../helpers/logger");
 
@@ -27,25 +28,53 @@ router.get("/:contactId", async (req, res, next) => {
 });
 
 router.post("/", async (req, res, next) => {
-  req.body.name = "";
-  req.body.email = "";
-  req.body.phone = "152-125-152";
+  req.body.name = "ula";
+  req.body.email = "ula@wp.pl";
+  req.body.phone = "412-125-145";
   const keys = Object.keys(req.body);
   console.log("keys", keys);
   console.log("req.body", req.body);
 
-  if (!req.body.name || !req.body.email || !req.body.phone) {
+  /*if (!req.body.name || !req.body.email || !req.body.phone) {
+    const message = [];
     if (!req.body.name) {
-      res.status(400).json({ message: "missing required name - field" });
+      message.push({ message: "missing required name - field" });
+      //res.status(400).json({ message: "missing required name - field" });
     }
-
     if (!req.body.email) {
-      res.status(400).json({ message: "missing required email - field" });
+      message.push({ message: "missing required email - field" });
+      console.log(message);
+      // res.status(400).json({ message: "missing required email - field" });
     }
-
     if (!req.body.phone) {
-      res.status(400).json({ message: "missing required phone - field" });
+      message.push({ message: "missing required phone - field" });
+      console.log(message);
+      // res.status(400).json({ message: "missing required phone - field" });
     }
+    return res.status(400).json(message);
+  }*/
+
+  if (!req.body.name || !req.body.email || !req.body.phone) {
+    let messageNoName;
+    let messageNoEmail;
+    let messageNoPhone;
+
+    if (!req.body.name) {
+      messageNoName = { message1: "missing required name - field" };
+
+      //res.status(400).json({ message: "missing required name - field" });
+    }
+    if (!req.body.email) {
+      messageNoEmail = { message2: "missing required email - field" };
+      // res.status(400).json({ message: "missing required email - field" });
+    }
+    if (!req.body.phone) {
+      messageNoPhone = { message3: "missing required phone - field" };
+
+      // res.status(400).json({ message: "missing required phone - field" });
+    }
+    const message = { ...messageNoName, ...messageNoEmail, ...messageNoPhone };
+    return res.status(400).json(message);
   }
 
   if (req.body.name && req.body.email && req.body.phone) {
@@ -68,7 +97,19 @@ router.delete("/:contactId", async (req, res, next) => {
 });
 
 router.put("/:contactId", async (req, res, next) => {
-  res.json({ message: "template message" });
+  const { contactId } = req.params;
+  const { name, email, phone } = req.body;
+  //req.body.name = "";
+  req.body.name = "hihihi";
+  // req.body.email = "updated";
+  console.log("req.body", req.body);
+
+  if (Object.keys(req.body).length === 0) {
+    return res.status(400).json({ message: "missing fields" });
+  } else {
+    const updatedContact = await updateContact(contactId, req.body);
+    return res.status(200).json(updatedContact);
+  }
 });
 
 module.exports = router;
