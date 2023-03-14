@@ -69,7 +69,7 @@ router.put("/:contactId", async (req, res, next) => {
     const updatedContact = await updateContact(contactId, req.body);
     res.status(200).json(updatedContact);
   } catch (err) {
-    res.status(500).json(err.details);
+    res.status(500).json({ message: "sth went wrong!!" });
   }
 });
 
