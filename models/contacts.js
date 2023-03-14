@@ -10,14 +10,13 @@ const listContacts = async () => {
 };
 
 const getContactById = async (contactId) => {
-  const id = contacts.find((object) => object.id === contactId);
-  return id;
+  const contact = contacts.find((object) => object.id === contactId);
+  return contact;
 };
 
 const addContact = async (body) => {
   body.id = uuidv4();
   contacts.push(body);
-  console.table(contacts);
   const dataToAdd = JSON.stringify(contacts);
   const dataToAddString = `${dataToAdd}`;
   await fs.writeFile(contactsPath, dataToAddString);
@@ -29,7 +28,6 @@ const removeContact = async (contactId) => {
     (object) => object.id === contactId
   );
   const removedContacts = contacts.splice(isContactFound, 1);
-  console.log("removedContacts", removedContacts);
   const dataToAdd = JSON.stringify(contacts);
   const dataToAddString = `${dataToAdd}`;
   await fs.writeFile(contactsPath, dataToAddString);
@@ -44,7 +42,6 @@ const updateContact = async (contactId, body) => {
   await removeContact(contactId);
   contacts.push(contactToUpdate);
 
-  console.table(contacts);
   const dataToAdd = JSON.stringify(contacts);
   const dataToAddString = `${dataToAdd}`;
   await fs.writeFile(contactsPath, dataToAddString);
