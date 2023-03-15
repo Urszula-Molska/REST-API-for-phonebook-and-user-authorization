@@ -15,8 +15,7 @@ const getContactById = async (contactId) => {
 };
 
 const addContact = async (body) => {
-  body.id = uuidv4();
-  contacts.push(body);
+  contacts.push({ ...body, id: uuidv4() });
   const dataToAdd = JSON.stringify(contacts);
   const dataToAddString = `${dataToAdd}`;
   await fs.writeFile(contactsPath, dataToAddString);
@@ -27,7 +26,7 @@ const removeContact = async (contactId) => {
   const isContactFound = contacts.findIndex(
     (object) => object.id === contactId
   );
-  const removedContacts = contacts.splice(isContactFound, 1);
+  contacts.splice(isContactFound, 1);
   const dataToAdd = JSON.stringify(contacts);
   const dataToAddString = `${dataToAdd}`;
   await fs.writeFile(contactsPath, dataToAddString);

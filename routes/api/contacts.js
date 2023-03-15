@@ -59,7 +59,7 @@ router.put("/:contactId", async (req, res, next) => {
   const { contactId } = req.params;
 
   try {
-    const { error } = schemaPost.validate(req.body, {
+    const { error } = schemaPut.validate(req.body, {
       abortEarly: false,
     });
     if (error) {
