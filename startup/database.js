@@ -9,8 +9,11 @@ if (!dbpath) {
 const connectDatabase = async () => {
   await mongoose
     .connect(dbpath)
-    .then(() => console.log("Connected to mongo db..."))
-    .catch((err) => console.log("error to connect db" + err));
+    .then(() => console.log("Database connection successful"))
+    .catch((err) => {
+      console.log("error to connect db" + err);
+      process.exit(1);
+    });
 };
 
 module.exports = { connectDatabase };

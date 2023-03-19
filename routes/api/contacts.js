@@ -68,7 +68,6 @@ router.delete("/:id", async (req, res, next) => {
 
 router.put("/:id", async (req, res, next) => {
   const { id } = req.params;
-  console.log(req.body, id);
   if (!id) {
     return res.status(400).send("Id is required to perform put");
   }
@@ -90,10 +89,13 @@ router.put("/:id", async (req, res, next) => {
 router.patch("/:id/favorite", async (req, res, next) => {
   const { id } = req.params;
   const { favorite } = req.body;
-  console.log("req.body", req.body);
-  if (!favorite) {
-    return res.status(404).json({ message: "missing field favorite" });
+  const { error } = schemaPatch.validate(req.body, {
+    abortEarly: false,
+  });
+  if (error) {
+    return res.status(404).json({ message: `${error.message}` });
   }
+
   try {
     const updatedStatus = await updateStatusContact(id, favorite);
     if (updatedStatus) {
