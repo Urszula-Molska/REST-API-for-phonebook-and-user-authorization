@@ -9,6 +9,7 @@ const schemaPost = Joi.object({
     })
     .required(),
   phone: Joi.string().required().min(5),
+  favorite: Joi.boolean(),
 });
 
 const schemaPut = Joi.object({
@@ -18,6 +19,11 @@ const schemaPut = Joi.object({
     tlds: { allow: ["com", "net", "pl", "org", "eu"] },
   }),
   phone: Joi.string().min(5),
+  favorite: Joi.boolean(),
 });
 
-module.exports = { schemaPost, schemaPut };
+const schemaPatch = Joi.object({
+  favorite: Joi.boolean().required(),
+});
+
+module.exports = { schemaPost, schemaPut, schemaPatch };
