@@ -1,5 +1,5 @@
 const express = require("express");
-const { schemaPut, schemaPost } = require("../../schema.js");
+const { schemaPut, schemaPost, schemaPatch } = require("../../schema.js");
 
 const {
   listContacts,
@@ -7,36 +7,45 @@ const {
   addContact,
   removeContact,
   updateContact,
-} = require("../../models/contacts.js");
+  updateStatusContact,
+} = require("../../controllers/contacts.js");
 
 const router = express.Router();
 
 router.get("/", async (req, res, next) => {
-  const contacts = await listContacts();
-  res.status(200).json(contacts);
+  try {
+    const contacts = await listContacts();
+    res.status(200).json(contacts);
+  } catch {
+    return res.status(500).send("Something went wrong");
+  }
 });
 
-router.get("/:contactId", async (req, res, next) => {
-  const { contactId } = req.params;
-  const user = await getContactById(contactId);
-  if (user === undefined) {
-    res
-      .status(404)
-      .json({ message: `Not found: there is no user with ${contactId} id` });
-  } else {
-    res.status(200).json({ user });
+router.get("/:id", async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const user = await getContactById(id);
+    if (user === undefined) {
+      res
+        .status(404)
+        .json({ message: `Not found: there is no user with ${id} id` });
+    } else {
+      res.status(200).json({ user });
+    }
+  } catch {
+    return res.status(500).send("Something went wrong");
   }
 });
 
 router.post("/", async (req, res, next) => {
-  try {
-    const { error } = schemaPost.validate(req.body, {
-      abortEarly: false,
-    });
+  const { error } = schemaPost.validate(req.body, {
+    abortEarly: false,
+  });
 
-    if (error) {
-      return res.status(404).json({ message: `${error.message}` });
-    }
+  if (error) {
+    return res.status(404).json({ message: `${error.message}` });
+  }
+  try {
     const response = await addContact(req.body);
     return res.status(201).json(response);
   } catch (err) {
@@ -44,32 +53,58 @@ router.post("/", async (req, res, next) => {
   }
 });
 
-router.delete("/:contactId", async (req, res, next) => {
-  const { contactId } = req.params;
-  const index = await removeContact(contactId);
-
-  if (index !== -1) {
-    res.status(200).json({ message: `contact with ${contactId} id deleted` });
-  } else {
-    res.status(400).json({ message: "Not found" });
+router.delete("/:id", async (req, res, next) => {
+  const { id } = req.params;
+  if (!id) {
+    return res.status(400).send("Id is required to perform delete");
+  }
+  try {
+    await removeContact(id);
+    return res.status(200).json({ message: `contact with ${id} id deleted` });
+  } catch (err) {
+    return res.status(500).send(`${err}`);
   }
 });
 
-router.put("/:contactId", async (req, res, next) => {
-  const { contactId } = req.params;
+router.put("/:id", async (req, res, next) => {
+  const { id } = req.params;
+  if (!id) {
+    return res.status(400).send("Id is required to perform put");
+  }
 
+  const { error } = schemaPut.validate(req.body, {
+    abortEarly: false,
+  });
+  if (error) {
+    return res.status(404).json({ message: `${error.message}` });
+  }
   try {
-    const { error } = schemaPut.validate(req.body, {
-      abortEarly: false,
-    });
-    if (error) {
-      return res.status(404).json({ message: `${error.message}` });
-    }
-
-    const updatedContact = await updateContact(contactId, req.body);
+    const updatedContact = await updateContact(id, req.body);
     res.status(200).json(updatedContact);
   } catch (err) {
-    res.status(500).json({ message: "sth went wrong!!" });
+    res.status(500).json({ message: `${err}` });
+  }
+});
+
+router.patch("/:id/favorite", async (req, res, next) => {
+  const { id } = req.params;
+  const { favorite } = req.body;
+  const { error } = schemaPatch.validate(req.body, {
+    abortEarly: false,
+  });
+  if (error) {
+    return res.status(404).json({ message: `${error.message}` });
+  }
+
+  try {
+    const updatedStatus = await updateStatusContact(id, favorite);
+    if (updatedStatus) {
+      res.status(200).json(updatedStatus);
+    } else {
+      res.status(404).json({ message: "Not found" });
+    }
+  } catch (err) {
+    res.status(500).json({ message: `${err}` });
   }
 });
 
