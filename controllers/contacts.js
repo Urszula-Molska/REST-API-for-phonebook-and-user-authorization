@@ -3,7 +3,6 @@ const { Contact } = require("../models/contact");
 const addContact = async (name, email, phone, favorite) => {
   try {
     const contact = new Contact(name, email, phone, favorite);
-    console.log("contact", contact);
     contact.save();
     return contact;
   } catch (err) {
