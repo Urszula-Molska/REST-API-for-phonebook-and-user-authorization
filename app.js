@@ -7,7 +7,7 @@ dotenv.config();
 
 const contactsRouter = require("./routes/api/contacts");
 
-const { connectDatabase } = require("./startup/database.js");
+const { connectDatabase } = require("./config/database.js");
 
 connectDatabase();
 

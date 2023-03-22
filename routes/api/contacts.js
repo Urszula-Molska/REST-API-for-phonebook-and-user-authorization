@@ -25,7 +25,7 @@ router.get("/:id", async (req, res, next) => {
   try {
     const { id } = req.params;
     const user = await getContactById(id);
-    if (user === undefined) {
+    if (!user) {
       res
         .status(404)
         .json({ message: `Not found: there is no user with ${id} id` });
