@@ -1,5 +1,10 @@
 const Joi = require("joi");
 
+const userValidationSchema = Joi.object({
+  email: Joi.string().required().email(),
+  password: Joi.string().required().min(6),
+});
+
 const schemaPost = Joi.object({
   name: Joi.string().required().min(3).max(30),
   email: Joi.string()
@@ -9,6 +14,7 @@ const schemaPost = Joi.object({
     })
     .required(),
   phone: Joi.string().required().min(5),
+  favorite: Joi.boolean(),
 });
 
 const schemaPut = Joi.object({
@@ -18,6 +24,11 @@ const schemaPut = Joi.object({
     tlds: { allow: ["com", "net", "pl", "org", "eu"] },
   }),
   phone: Joi.string().min(5),
+  favorite: Joi.boolean(),
 });
 
-module.exports = { schemaPost, schemaPut };
+const schemaPatch = Joi.object({
+  favorite: Joi.boolean().required(),
+});
+
+module.exports = { userValidationSchema, schemaPost, schemaPut, schemaPatch };
