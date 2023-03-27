@@ -27,12 +27,6 @@ const auth = async (req, res, next) => {
     } else {
       return res.status(401).send("Not authorized");
     }
-
-    //zad dom:
-    //Jeżeli walidacja przeszła pomyślnie, otrzymaj z tokena id użytkownika.
-    //Znajdź użytkownika w bazie danych po tym id.
-    //Jeśli użytkownik istnieje i token pokrywa się z tym, co znajduje się w bazie,
-    //zapisz jego dane w req.user i wywołaj metodę next().
   } catch {
     return res.status(401).send("Access denied");
   }

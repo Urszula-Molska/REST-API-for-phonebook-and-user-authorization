@@ -30,7 +30,6 @@ router.post("/signup", async (req, res, next) => {
   try {
     const { email, password } = req.body;
     const user = await createUser(email, password);
-    //console.log("new user", user);
     // zwracamy nowo utworzonego usera
     return res.status(201).json(user);
   } catch {
@@ -95,16 +94,3 @@ router.get("/current", auth, async (req, res, next) => {
 });
 
 module.exports = router;
-
-/*{"email": "witek@wp.pl",
-"password": "witekwitek"}*/
-
-/*{"email":"test@wp.pl",
-"password": "123456789"}*/
-
-//{"favorite": false}
-
-/*{
-"email": "ula@wp.pl",
-"password": "ulaula"
-}*/
