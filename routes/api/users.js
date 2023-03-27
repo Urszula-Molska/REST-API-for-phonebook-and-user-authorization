@@ -1,8 +1,9 @@
 const express = require("express");
+const { userValidationSchema } = require("../../schema.js");
+const Joi = require("joi");
 const jwt = require("jsonwebtoken");
 const { loginHandler } = require("../../auth/loginHandler");
 const { auth } = require("../../auth/auth.js");
-const { userValidationSchema } = require("../../schema.js");
 
 const {
   getUserByEmail,
@@ -37,14 +38,12 @@ router.post("/signup", async (req, res, next) => {
   }
 });
 
-router.patch("/login", async (req, res, next) => {
+router.post("/login", async (req, res, next) => {
   const { error } = userValidationSchema.validate(req.body);
   if (error) {
     return res.status(400).send(error.details[0].message);
   }
-
   const { email, password } = req.body;
-
   try {
     // const token = await loginHandler(email, password);
     //return res.status(200).send(token);
@@ -55,7 +54,7 @@ router.patch("/login", async (req, res, next) => {
   }
 });
 
-router.patch("/logout", auth, async (req, res, next) => {
+router.get("/logout", auth, async (req, res, next) => {
   try {
     const jwtSecret = process.env.JWT_SECRET;
     const token = req.headers.authorization;
@@ -76,6 +75,25 @@ router.patch("/logout", auth, async (req, res, next) => {
   }
 });
 
+router.get("/current", auth, async (req, res, next) => {
+  try {
+    const jwtSecret = process.env.JWT_SECRET;
+    const token = req.headers.authorization;
+    const decoded = jwt.verify(token, jwtSecret);
+    const id = decoded.id;
+
+    const user = await getUserById(id);
+
+    if (user) {
+      return res.status(200).json(user);
+    } else {
+      return res.status(401).send("Not authorized");
+    }
+  } catch {
+    return res.status(401).send({ message: "Not authorized!!!" });
+  }
+});
+
 module.exports = router;
 
 /*{"email": "witek@wp.pl",
@@ -83,3 +101,10 @@ module.exports = router;
 
 /*{"email":"test@wp.pl",
 "password": "123456789"}*/
+
+//{"favorite": false}
+
+/*{
+"email": "ula@wp.pl",
+"password": "ulaula"
+}*/
