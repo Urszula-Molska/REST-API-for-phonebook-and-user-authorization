@@ -1,6 +1,5 @@
 const express = require("express");
 const { userValidationSchema } = require("../../schema.js");
-const Joi = require("joi");
 const jwt = require("jsonwebtoken");
 const { loginHandler } = require("../../auth/loginHandler");
 const { auth } = require("../../auth/auth.js");
@@ -9,7 +8,6 @@ const {
   getUserByEmail,
   createUser,
   getUserById,
-  removeToken,
   updateTokenStatus,
 } = require("../../controllers/users.js");
 
@@ -30,7 +28,6 @@ router.post("/signup", async (req, res, next) => {
   try {
     const { email, password } = req.body;
     const user = await createUser(email, password);
-    // zwracamy nowo utworzonego usera
     return res.status(201).json(user);
   } catch {
     return res.status(500).send("Something went wrong");
@@ -44,8 +41,6 @@ router.post("/login", async (req, res, next) => {
   }
   const { email, password } = req.body;
   try {
-    // const token = await loginHandler(email, password);
-    //return res.status(200).send(token);
     const updatedStatus = await loginHandler(email, password);
     return res.status(200).json(updatedStatus);
   } catch {

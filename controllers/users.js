@@ -1,11 +1,9 @@
 const { User, hashPassword } = require("../models/user.js");
 
 const createUser = async (email, password) => {
-  // haszujemy hasło
   const hashedPassword = hashPassword(password);
 
   try {
-    // tworzymy usera z zahaszowanym hasłem
     const user = new User({ email, password: hashedPassword });
 
     user.save();
