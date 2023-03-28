@@ -27,23 +27,9 @@ const getUserById = async (_id) => {
 };
 
 const updateTokenStatus = async (id, token) => {
-  const user = await User.findByIdAndUpdate(id, token);
-  console.log("id", id);
-  console.log(token);
-  user.token = token;
+  const user = await User.findByIdAndUpdate(id, { token }, { new: true });
   return user;
 };
-
-/*const removeToken = async (_id) => {
-  const user = await User.findOne({ _id });
-  console.log("user", user);
-  user.token = null;
-  return user;*/
-
-//const userToDeleteToken = await User.findByIdAndUpdate(id);
-//userToDeleteToken.token = null;
-//console.log(userToDeleteToken);
-//return userToDeleteToken;
 
 module.exports = {
   createUser,

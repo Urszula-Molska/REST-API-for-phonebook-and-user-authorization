@@ -83,7 +83,7 @@ router.get("/current", auth, async (req, res, next) => {
 
     const user = await getUserById(id);
 
-    if (user) {
+    if (user && user.token === token) {
       return res.status(200).json(user);
     } else {
       return res.status(401).send("Not authorized");

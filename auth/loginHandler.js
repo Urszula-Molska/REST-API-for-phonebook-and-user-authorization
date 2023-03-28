@@ -22,8 +22,8 @@ const loginHandler = async (email, incomingPassword) => {
   if (result) {
     //zapisać token w user'rze
     const token = issueToken(user);
-    const updatedUser = await updateTokenStatus(user._id, token);
-    console.log(updatedUser);
+    const updatedUser = await updateTokenStatus(user._id.valueOf(), token);
+
     //return token;
     return updatedUser;
   } else {
