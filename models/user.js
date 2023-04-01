@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-
 const Schema = mongoose.Schema;
 const bcrypt = require("bcrypt");
 
@@ -21,6 +20,9 @@ const users = new Schema({
   token: {
     type: String,
     default: null,
+  },
+  avatarURL: {
+    type: String,
   },
 });
 

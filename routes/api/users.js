@@ -1,8 +1,12 @@
 const express = require("express");
+const createError = require("http-errors");
 const { userValidationSchema } = require("../../schema.js");
 const jwt = require("jsonwebtoken");
 const { loginHandler } = require("../../auth/loginHandler");
 const { auth } = require("../../auth/auth.js");
+const { upload, storeImage } = require("../../config/multer.js");
+const path = require("path");
+const fs = require("fs").promises;
 
 const {
   getUserByEmail,
@@ -13,24 +17,30 @@ const {
 
 const router = express.Router();
 
-router.post("/signup", async (req, res, next) => {
+router.use("/public", express.static("public"));
+
+router.post("/signup", upload.single("avatar"), async (req, res, next) => {
   const { error } = userValidationSchema.validate(req.body);
   if (error) {
     return res.status(400).send(error.details[0].message);
   }
   const email = req.body.email;
   const ifEmailExist = await getUserByEmail(email);
-
+  //// a jak zwalidować brak wysłania zdjęcia przez użytkownika
+  //error: path is undefined
+  const { path: temporaryName, originalname } = req.file;
+  const filePath = path.join(storeImage, originalname);
   if (ifEmailExist) {
     return res.status(409).send({ message: "Email in use" });
   }
-
   try {
     const { email, password } = req.body;
-    const user = await createUser(email, password);
+    const user = await createUser(email, password, filePath);
+    await fs.rename(temporaryName, filePath);
     return res.status(201).json(user);
-  } catch {
-    return res.status(500).send("Something went wrong");
+  } catch (err) {
+    return next(err);
+    //return res.status(500).send("Something went wrong");
   }
 });
 
