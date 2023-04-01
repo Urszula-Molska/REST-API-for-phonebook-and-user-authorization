@@ -17,8 +17,6 @@ const {
 
 const router = express.Router();
 
-router.use("/public", express.static("public"));
-
 router.post("/signup", upload.single("avatar"), async (req, res, next) => {
   const { error } = userValidationSchema.validate(req.body);
   if (error) {
