@@ -1,29 +1,29 @@
 const { User, hashPassword } = require("../models/user.js");
 const path = require("path");
-const createError = require("http-errors");
-const fs = require("fs").promises;
 var gravatar = require("gravatar");
 const Jimp = require("jimp");
 const NewStoreImage = path.join(process.cwd(), "public/avatars");
+const jwt = require("jsonwebtoken");
 
 const createUser = async (email, password, filePath) => {
   const hashedPassword = hashPassword(password);
-
-  const avatar = gravatar.profile_url(email, {
-    protocol: "https",
-    format: "jpg",
-  });
-  console.log("avatar", avatar);
-  const ImgName = path.basename(avatar);
-  const newFilePath = path.join(NewStoreImage, ImgName);
-  console.log("newFilePath", newFilePath);
-
-  Jimp.read(filePath, (err, pict) => {
-    if (err) throw err;
-    pict.resize(250, 250).quality(80).write(newFilePath);
-  });
-
+  let avatar;
   try {
+    if (filePath !== undefined) {
+      avatar = gravatar.profile_url(email, {
+        protocol: "https",
+        format: "jpg",
+      });
+
+      const ImgName = path.basename(avatar);
+      const newFilePath = path.join(NewStoreImage, ImgName);
+
+      Jimp.read(filePath, (err, pict) => {
+        if (err) throw err;
+        pict.resize(250, 250).quality(80).write(newFilePath);
+      });
+    }
+
     const user = new User({
       email,
       password: hashedPassword,
@@ -53,9 +53,17 @@ const updateTokenStatus = async (id, token) => {
   return user;
 };
 
+const findUserIdFromToken = (token) => {
+  const jwtSecret = process.env.JWT_SECRET;
+  const decoded = jwt.verify(token, jwtSecret);
+  const id = decoded.id;
+  return id;
+};
+
 module.exports = {
   createUser,
   getUserByEmail,
   updateTokenStatus,
   getUserById,
+  findUserIdFromToken,
 };

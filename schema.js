@@ -3,6 +3,7 @@ const Joi = require("joi");
 const userValidationSchema = Joi.object({
   email: Joi.string().required().email(),
   password: Joi.string().required().min(6),
+  avatar: Joi.string(),
 });
 
 const schemaPost = Joi.object({
@@ -31,4 +32,9 @@ const schemaPatch = Joi.object({
   favorite: Joi.boolean().required(),
 });
 
-module.exports = { userValidationSchema, schemaPost, schemaPut, schemaPatch };
+module.exports = {
+  userValidationSchema,
+  schemaPost,
+  schemaPut,
+  schemaPatch,
+};
