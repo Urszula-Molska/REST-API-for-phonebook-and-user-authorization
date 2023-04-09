@@ -4,9 +4,11 @@ var gravatar = require("gravatar");
 const Jimp = require("jimp");
 const NewStoreImage = path.join(process.cwd(), "public/avatars");
 const jwt = require("jsonwebtoken");
+const { v4: uuidv4 } = require("uuid");
 
 const createUser = async (email, password, filePath) => {
   const hashedPassword = hashPassword(password);
+  const verificationToken = uuidv4();
   let avatar;
   try {
     if (filePath !== undefined) {
@@ -28,6 +30,7 @@ const createUser = async (email, password, filePath) => {
       email,
       password: hashedPassword,
       avatarURL: avatar,
+      verificationToken,
     });
 
     user.save();
@@ -45,6 +48,12 @@ const getUserByEmail = async (email) => {
 
 const getUserById = async (_id) => {
   const user = await User.findOne({ _id });
+  return user;
+};
+
+const getUserByVerificationToken = async (verificationToken) => {
+  const user = await User.findOne({ verificationToken });
+  console.log({ user });
   return user;
 };
 
@@ -66,4 +75,5 @@ module.exports = {
   updateTokenStatus,
   getUserById,
   findUserIdFromToken,
+  getUserByVerificationToken,
 };
