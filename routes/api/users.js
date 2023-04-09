@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const { loginHandler } = require("../../auth/loginHandler");
 const { auth } = require("../../auth/auth.js");
 const { upload, storeImage } = require("../../config/multer.js");
+const { sendEmail } = require("../../config/nodemailer.js");
 const path = require("path");
 const fs = require("fs").promises;
 const Jimp = require("jimp");
@@ -15,6 +16,7 @@ const {
   getUserById,
   updateTokenStatus,
   findUserIdFromToken,
+  getUserByVerificationToken,
 } = require("../../controllers/users.js");
 
 const router = express.Router();
@@ -37,28 +39,60 @@ router.post("/signup", upload.single("avatar"), async (req, res, next) => {
       const { email, password } = req.body;
       const user = await createUser(email, password, filePath);
       await fs.rename(temporaryName, filePath);
+      //weryfikacja e-mailu: wysłanie e-maila do użytkownika z linkiem do weryfikacji
+      sendEmail(user.verificationToken, email);
       return res.status(201).json(user);
     } else {
       const { email, password } = req.body;
       const user = await createUser(email, password);
+      //weryfikacja e-mailu: wysłanie e-maila do użytkownika z linkiem do weryfikacji
+      sendEmail(user.verificationToken, email);
       return res.status(201).json(user);
     }
   } catch (err) {
-    return res.status(500).send("Something went wrong");
+    return res.status(500).send({ message: `${error}` });
   }
 });
 
+//login ma być możliwy po weryfikacji e-mailu użytkownika i gdy verify: true
 router.post("/login", async (req, res, next) => {
   const { error } = userValidationSchema.validate(req.body);
   if (error) {
     return res.status(400).send(error.details[0].message);
   }
   const { email, password } = req.body;
+  const user = await getUserByEmail(email);
+  console.log({ email });
+
   try {
-    const updatedStatus = await loginHandler(email, password);
-    return res.status(200).json(updatedStatus);
+    if (user.verify === true) {
+      const updatedStatus = await loginHandler(email, password);
+      return res.status(200).json(updatedStatus);
+    } else return res.status(401).send({ message: "Email not authorized" });
   } catch {
     return res.status(401).send({ message: "Email or password is wrong" });
+  }
+});
+
+router.get("/verify/:verificationToken", async (req, res, next) => {
+  //szukamy użytkownika z tym tokenem
+  const { verificationToken } = req.params;
+  console.log(req.params);
+  try {
+    const user = await getUserByVerificationToken(verificationToken);
+    console.log({ verificationToken });
+    if (!user) {
+      res.status(404).json({
+        message: `Not found: there is no user with ${verificationToken} verificationToken `,
+      });
+    } else {
+      user.verificationToken = null;
+      user.verify = true;
+      user.save();
+      res.status(200).send({ message: "Verification successful" });
+    }
+  } catch {
+    return res.status(401).send({ message: "Not verified!!!" });
   }
 });
 
