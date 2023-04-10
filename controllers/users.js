@@ -1,6 +1,6 @@
 const { User, hashPassword } = require("../models/user.js");
 const path = require("path");
-var gravatar = require("gravatar");
+const gravatar = require("gravatar");
 const Jimp = require("jimp");
 const NewStoreImage = path.join(process.cwd(), "public/avatars");
 const jwt = require("jsonwebtoken");
