@@ -1,5 +1,8 @@
 const express = require("express");
-const { userValidationSchema } = require("../../schema.js");
+const {
+  userValidationSchema,
+  schemaSecondEmailVerification,
+} = require("../../schema.js");
 const jwt = require("jsonwebtoken");
 const { loginHandler } = require("../../auth/loginHandler");
 const { auth } = require("../../auth/auth.js");
@@ -39,13 +42,11 @@ router.post("/signup", upload.single("avatar"), async (req, res, next) => {
       const { email, password } = req.body;
       const user = await createUser(email, password, filePath);
       await fs.rename(temporaryName, filePath);
-      //weryfikacja e-mailu: wysłanie e-maila do użytkownika z linkiem do weryfikacji
       sendEmail(user.verificationToken, email);
       return res.status(201).json(user);
     } else {
       const { email, password } = req.body;
       const user = await createUser(email, password);
-      //weryfikacja e-mailu: wysłanie e-maila do użytkownika z linkiem do weryfikacji
       sendEmail(user.verificationToken, email);
       return res.status(201).json(user);
     }
@@ -54,7 +55,6 @@ router.post("/signup", upload.single("avatar"), async (req, res, next) => {
   }
 });
 
-//login ma być możliwy po weryfikacji e-mailu użytkownika i gdy verify: true
 router.post("/login", async (req, res, next) => {
   const { error } = userValidationSchema.validate(req.body);
   if (error) {
@@ -75,15 +75,12 @@ router.post("/login", async (req, res, next) => {
 });
 
 router.get("/verify/:verificationToken", async (req, res, next) => {
-  //szukamy użytkownika z tym tokenem
   const { verificationToken } = req.params;
-  console.log(req.params);
   try {
     const user = await getUserByVerificationToken(verificationToken);
-    console.log({ verificationToken });
     if (!user) {
       res.status(404).json({
-        message: `Not found: there is no user with ${verificationToken} verificationToken `,
+        message: "User not found",
       });
     } else {
       user.verificationToken = null;
@@ -92,7 +89,35 @@ router.get("/verify/:verificationToken", async (req, res, next) => {
       res.status(200).send({ message: "Verification successful" });
     }
   } catch {
-    return res.status(401).send({ message: "Not verified!!!" });
+    return res.status(500).send({ message: "sth went wrong!!!" });
+  }
+});
+
+router.post("/verify/", async (req, res, next) => {
+  const { error } = schemaSecondEmailVerification.validate(req.body);
+  if (error) {
+    return res.status(400).send(error.details[0].message);
+  }
+  const { email } = req.body;
+  try {
+    const user = await getUserByEmail(email);
+    if (!user) {
+      return res
+        .status(404)
+        .send({ message: "Email not found. You have to sign in" });
+    }
+    if (user && user.verify) {
+      return res
+        .status(400)
+        .json({ message: "Verification has already been passed" });
+    } else {
+      sendEmail(user.verificationToken, email);
+      return res.status(200).send({
+        message: "Verification email sent",
+      });
+    }
+  } catch (error) {
+    return res.status(500).send({ message: `${error}` });
   }
 });
 

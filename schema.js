@@ -32,9 +32,14 @@ const schemaPatch = Joi.object({
   favorite: Joi.boolean().required(),
 });
 
+const schemaSecondEmailVerification = Joi.object({
+  email: Joi.string().required().email(),
+});
+
 module.exports = {
   userValidationSchema,
   schemaPost,
   schemaPut,
   schemaPatch,
+  schemaSecondEmailVerification,
 };

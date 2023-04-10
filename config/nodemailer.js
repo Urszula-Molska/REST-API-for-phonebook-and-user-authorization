@@ -1,5 +1,4 @@
 const nodemailer = require("nodemailer");
-const { v4: uuidv4 } = require("uuid");
 
 require("dotenv").config();
 
@@ -16,8 +15,7 @@ const config = {
 const transporter = nodemailer.createTransport(config);
 
 const sendEmail = (verificationToken, emailTo) => {
-  const verificationLink = `https://api/users/verify/:${verificationToken}`;
-  console.log({ verificationLink });
+  const verificationLink = `http://localhost:3000/api/users/verify/${verificationToken}`;
 
   const emailOptions = {
     from: "urszula_molska@wp.pl",
