@@ -53,7 +53,6 @@ const getUserById = async (_id) => {
 
 const getUserByVerificationToken = async (verificationToken) => {
   const user = await User.findOne({ verificationToken });
-  console.log({ user });
   return user;
 };
 
